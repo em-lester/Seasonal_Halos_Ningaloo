@@ -37,17 +37,29 @@ error.dir=paste(data.dir,"Errors to check",sep="/")
 shapefile.dir <- paste(data.dir,"Shapefiles",sep="/")
 
 # Read in the data----
-
-
 setwd(shapefile.dir)
 dir()
 
-# Define a vector with the filenames of the shapefiles
+# Define a vector with the filenames of the shapefiles (removed 20170726 as corrupt?)
 shapefile_filenames <- c("Measurements_20210128_Cloates.shp", "Measurements_20210321_Cloates.shp",
                          "Measurements_20210421_Cloates.shp", "Measurements_20210521_Cloates.shp",
                          "Measurements_20210628_Cloates.shp", "Measurements_20210723_Cloates.shp",
                          "Measurements_20210819_Cloates.shp", "Measurements_20210927_Cloates.shp",
-                         "Measurements_20211030_Cloates.shp", "Measurements_20211220_Cloates.shp")
+                         "Measurements_20211030_Cloates.shp", "Measurements_20211220_Cloates.shp",
+                         "Measurements_20191203_Cloates.shp", "Measurements_20191107_Cloates.shp",
+                         "Measurements_20190620_Cloates.shp", "Measurements_20190516_Cloates.shp",
+                         "Measurements_20190426_Cloates.shp", "Measurements_20190307_Cloates.shp",
+                         "Measurements_20190220_Cloates.shp", "Measurements_20190110_Cloates.shp",
+                         "Measurements_20181229_Cloates.shp", "Measurements_20181126_Cloates.shp",
+                         "Measurements_20180922_Cloates.shp", "Measurements_20180823_Cloates.shp",
+                         "Measurements_20180727_Cloates.shp", "Measurements_20180629_Cloates.shp",
+                         "Measurements_20180521_Cloates.shp", "Measurements_20180403_Cloates.shp",
+                         "Measurements_20180201_Cloates.shp", "Measurements_20180106_Cloates.shp", 
+                         "Measurements_20171027_Cloates.shp", 
+                         "Measurements_20170629_Cloates.shp", "Measurements_20170412_Cloates.shp",
+                         "Measurements_20170331_Cloates.shp", "Measurements_20170113_Cloates.shp",
+                         "Measurement_20190920_Cloates.shp", "Measurement_20190811_Cloates.shp",
+                         "Measurement_20190731_Cloates.shp", "Measurement_20170905_Cloates.shp")
 
 # Create an empty data frame to store mean lengths from all shapefiles
 all_mean_lengths <- data.frame()
@@ -64,7 +76,7 @@ for (filename in shapefile_filenames) {
   
   # Convert the shapefile to a dataframe
   shapefile_df <- as.data.frame(shapefile) %>%
-    dplyr::select(id, Location, Status, Measure, length) %>%
+    dplyr::select(id, Location, Status, Measure) %>%
     glimpse()
   
   # Calculate the length of each line
@@ -91,5 +103,5 @@ glimpse(all_mean_lengths)
 setwd(tidy.dir)
 
 # Save all mean lengths as a single CSV file
-write.csv(all_mean_lengths, file = "2021_mean_lengths.csv", row.names = FALSE)
+write.csv(all_mean_lengths, file = "2017_2021_mean_lengths.csv", row.names = FALSE)
 
