@@ -105,48 +105,4 @@ setwd(tidy.dir)
 # Save all mean lengths as a single CSV file
 write.csv(all_mean_lengths, file = "2017_2021_mean_lengths.csv", row.names = FALSE)
 
-## Now extract patch reef area from Halos_NMP file
-
-dir()
-
-halos <- st_read("Halos_NMP.shp")
-
-# Print the attribute  names
-
-names(halos)
-
-halos
-
-# filter for centre = Y and Location = Cloates
-
-halo_centre_cloates <- halos %>%
-  filter(Centre=="Y")%>%
-  filter(Location == "Cloates")%>%
-  glimpse()
-
-#calculate area of centre 
-
-# Clean and repair the geometry
-halo_centre_cloates <- st_make_valid(halo_centre_cloates)
-
-# Calculate the area of shapes and add it as a new variable
-halo_centre_cloates$area <- st_area(halo_centre_cloates)
-halo_centre_cloates
-
-#there is a pesky duplicate where I mislabelled the halo as the patchreef.
-#remove row number 16
-
-halo_centre_cloates <- halo_centre_cloates[-16, ]
-
-# Convert the shapefile to a data frame
-patchreef_data_frame <- st_drop_geometry(halo_centre_cloates)%>%
-  dplyr::select(id, Location, area)%>%
-  glimpse()
-
-patchreef_data_frame
-
-setwd(tidy.dir)
-
-# Save the data frame as a CSV file
-write.csv(patchreef_data_frame, "patchreef_area_cloates.csv", row.names = FALSE)
 # Fin
