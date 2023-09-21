@@ -10,6 +10,8 @@ library(rerddap)
 library(ncdf4)
 library(mapdata)
 library(tidyverse)
+library(lubridate)
+library(MetBrewer)
 #require("mapdata")
 
 installed.packages("rerddap")
@@ -60,13 +62,37 @@ ggplot(data = murSST$data, aes(x = longitude, y = latitude, fill = CRW_SST)) +
 str(SST)
 
 # Download the data to a dataframe
-df <- SST$data
+sst_df <- SST$data
 
 # View the first few rows of the data
-head(df)
+head(sst_df)
+glimpse(sst_df)
 
 # alrighty, now I guess we want to format date and time into something nice
 # then find mean monthly temp 
 
+# Convert the "time" column to a POSIXct datetime object
+mean_sst_df <- sst_df %>%
+  mutate(
+    time = ymd_hms(time),  # Assumes the date string format "YYYY-MM-DDTHH:MM:SSZ"
+    date = format(time, "%y-%m-%d"),
+    year = year(time),
+    month = factor(month(time, label = FALSE))
+  )%>%
+  
+  group_by(month)%>%
+  na.omit()%>%
+  mutate(mean_sst= mean(CRW_SST))%>%
+  ungroup()%>%
+  glimpse()
 
 
+# quick plot
+
+sst_plot <- ggplot(data =mean_sst_df, aes(x = month, y = mean_sst, colour = CRW_SST)) +
+  geom_point( size=3)+
+  scale_colour_gradientn(colors = met.brewer("Hokusai3"))+
+  theme_classic()
+sst_plot
+
+#NB this is only for 2017, need to do for all years, but will be easy
