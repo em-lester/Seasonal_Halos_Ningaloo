@@ -1,6 +1,6 @@
-#####################################################################
+###################################
 ## Downloading environmental data
-#####################################################################
+##################################
 
 # Clear memory ----
 rm(list=ls())
@@ -27,7 +27,7 @@ library(tidyverse)
 library(lubridate)
 library(MetBrewer)
 
-# Define the ERDDAP server URL and dataset ID 
+# Define the ERDDAP server URL and dataset ID ----
 
 server_url <- "https://coastwatch.pfeg.noaa.gov/erddap/"
 dataset_id <- "NOAA_DHW"  
@@ -41,7 +41,7 @@ latitude = c(-22.37, -22.75)
 longitude = c(113.78, 113.62)
 time = c("2017-01-01", "2021-12-31")
 
-# create gridapp query 
+# create gridapp query ----
 
 sstInfo <- info('NOAA_DHW')
 SST <- griddap(sstInfo, latitude = c(-22.37, -22.75), longitude = c(113.78, 113.62), time = c("2017-01-01", "2021-12-31"), fields = 'CRW_SST')
@@ -77,7 +77,7 @@ glimpse(sst_df)
 # alrighty, now I guess we want to format date and time into something nice
 # then find mean monthly temp 
 
-# Convert the "time" column to a POSIXct datetime object
+# Convert the "time" column to a POSIXct datetime object ----
 mean_sst_df <- sst_df %>%
   mutate(
     time = ymd_hms(time),  # Assumes the date string format "YYYY-MM-DDTHH:MM:SSZ"
@@ -103,9 +103,9 @@ sst_plot <- ggplot(data =mean_sst_df, aes(x = month, y = mean_sst, colour = mean
   theme_classic()
 sst_plot
 
+# sick
 
-
-# Extract chla using dataset id erdMH1chla1day_R2022NRT
+# Extract chla using dataset id erdMH1chla1day_R2022NRT ----
 
 server_url <- "https://coastwatch.pfeg.noaa.gov/erddap/"
 dataset_id <- "erdMH1chla1day"
@@ -119,7 +119,7 @@ latitude = c(-22.37, -22.75)
 longitude = c(113.78, 113.62)
 time = c("2017-01-01", "2021-12-31")
 
- # create gridapp query 
+ # create gridapp query ----
  
 chlaInfo <- info('erdMH1chla1day')
 chla <- griddap(chlaInfo, latitude = c(-22.37, -22.75), longitude = c(113.78, 113.62), time = c("2017-01-01", "2021-12-31"), fields = 'chlorophyll')
@@ -144,9 +144,9 @@ ggplot(data = Cloates_chla$data, aes(x = longitude, y = latitude, fill = chlorop
    theme_bw() + ylab("latitude") + xlab("longitude") +
    coord_fixed(1.3, xlim = c(113, 114.5),  ylim = c(-22, -23)) + ggtitle("Latest Chl a")
  
- # Looks alright :) 
+# Looks alright :) 
  
-# cool, same drill reformat date, plot spatial extent and calculate monthly values
+# reformat date, plot spatial extent and calculate monthly values ----
  
 # Check the structure of the data
 str(chla)
@@ -160,7 +160,6 @@ glimpse(chla_df)
 
 # format date and time into something nice then find mean monthly temp 
 
-# Convert the "time" column to a POSIXct datetime object
 mean_chla_df <- chla_df %>%
   mutate(
     time = ymd_hms(time),  # Assumes the date string format "YYYY-MM-DDTHH:MM:SSZ"
@@ -189,7 +188,7 @@ chla_plot <- ggplot(data =mean_chla_df, aes(x = month, y = mean_chla, colour = m
   theme_classic()
 chla_plot
 
-# combine with sst and write nice csv file
+# combine with sst and write nice csv file ----
 
 sst_chla <- left_join(mean_sst_df, mean_chla_df, by =c("yearmonth", "month", "year"))%>%
             dplyr::select(month:mean_chla)%>%
@@ -198,3 +197,5 @@ sst_chla <- left_join(mean_sst_df, mean_chla_df, by =c("yearmonth", "month", "ye
 setwd(tidy.dir)
 
 write.csv(sst_chla, file="SST_Chla_2017_2021.csv")
+
+#fin
