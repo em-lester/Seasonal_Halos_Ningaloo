@@ -59,4 +59,13 @@ plot <-  ggplot(aes(x=month,y=MeanLength,  color=year), data=dat)+ facet_wrap(~i
 
 plot
 
+plot_combined <-  ggplot(aes(x=month,y=MeanLength,  color=year), data=dat)+
+  geom_point()+
+  ylab("Mean halo length (m)")+
+  xlab('Month')+
+  scale_color_manual(values=met.brewer("Renoir", 4))+
+  theme_classic()
+
+plot_combined
+
 # it is a start :)
