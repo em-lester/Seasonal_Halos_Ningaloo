@@ -198,4 +198,100 @@ setwd(tidy.dir)
 
 write.csv(sst_chla, file="SST_Chla_2017_2021.csv")
 
+
+## PAR data ----
+
+setwd(raw.dir)
+dir()
+
+PAR_dat <- read.csv("PAR.csv") %>%
+  dplyr::select(location_name, time, qc_value, qc_flag)%>%
+  unique()%>%
+  mutate_at(vars(location_name, qc_flag), list(as.factor)) %>%
+  filter(qc_flag == "Good")%>%
+  mutate(
+    time = ymd_hms(time),  # Assumes the date string format "YYYY-MM-DDTHH:MM:SSZ"
+    date = format(time, "%y-%m-%d"),
+    year = factor(year(time)),
+    month = factor(month(time, label = FALSE)),
+    day= factor(day(time)))%>%
+group_by(year, month)%>%
+mutate(monthly_PAR = mean(qc_value))%>%
+  ungroup()%>%
+  dplyr::select(location_name, year, month, monthly_PAR)%>%
+  unique()%>%
+  glimpse()
+
+gg_PAR <- ggplot(aes(x=month, y=monthly_PAR, colour=year), data=PAR_dat)+
+         geom_point()+
+         scale_colour_manual(values=met.brewer("Hokusai3", 5))+
+         theme_classic()
+gg_PAR
+
+setwd(plots.dir)
+ggsave("monthlyPAR.tiff", gg_PAR, dpi=300 )
+dir()
+
+# Rainfall data ----
+
+rain_dat <- read.csv("Learmonth rainfall.csv")%>%
+  dplyr::select(Year, Month, Day, Rainfall.amount..millimetres.)%>%
+  na.omit()%>%
+  filter(Year >2016)%>%
+  filter(Year <2022)%>%
+  mutate_at(vars(Year, Month), list(as.factor)) %>%
+  group_by(Year, Month)%>%
+  mutate(total_monthly_rain = sum( Rainfall.amount..millimetres.))%>%
+  dplyr::select(Year, Month,total_monthly_rain )%>%
+  rename(year = Year) %>%
+  rename(month = Month) %>%
+  unique()%>%
+  glimpse()
+
+gg_rain <- ggplot(aes(x=Month, y=total_monthly_rain, colour=Year), data=rain_dat)+
+  geom_point()+
+  scale_colour_manual(values=met.brewer("Hokusai3", 5))+
+  theme_classic()
+gg_rain
+
+setwd(plots.dir)
+ggsave("monthly_total_rain.tiff", gg_rain, dpi=300 )
+
+# join rain and PAR ----
+
+rain_PAR_dat <- left_join(rain_dat, PAR_dat, by = c("year", "month"))
+
+head(rain_PAR_dat)
+
+setwd(tidy.dir)
+write.csv(file="Rainfall_PAR.csv", rain_PAR_dat)
+
+# wind data ----
+setwd(raw.dir)
+
+wind_dat <- read.csv("wind_speed.csv")%>%
+  #na.omit()%>%
+  dplyr::select(qc_value, qc_flag, time) %>%
+  mutate(wind_speed_ms = qc_value * (5/18))%>%
+  mutate_at(vars( qc_flag), list(as.factor)) %>%
+  filter(qc_flag == "Good")%>%
+  mutate(
+    time = ymd_hms(time),  # Assumes the date string format "YYYY-MM-DDTHH:MM:SSZ"
+    date = format(time, "%y-%m-%d"),
+    year = factor(year(time)),
+    month = factor(month(time, label = FALSE)))%>%
+  filter(year %in% c("2017", "2018", "2019", "2020", "2021"))%>%
+  group_by(year, month)%>%
+  mutate(monthly_wind_speed = mean(wind_speed_ms))%>%
+  dplyr::select(year, month, monthly_wind_speed)%>%
+  unique()%>%
+  glimpse()
+
+ggplot(aes(x=month, y=monthly_wind_speed, colour=year), data=wind_dat)+
+  geom_point()+
+  scale_colour_manual(values=met.brewer("Hokusai3", 5))+
+  theme_classic()
+
+
+
 #fin
